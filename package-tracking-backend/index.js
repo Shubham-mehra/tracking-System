@@ -24,6 +24,7 @@ const packageSchema = new mongoose.Schema({
   trackingId: { type: String, required: true, unique: true },
   status: { type: String, default: 'Pending' },
   currentLocation: { type: String, default: 'Origin' },
+  productName : {type: String, default:'Null'},
   estimatedDelivery: String,
   history: [
     {
@@ -75,13 +76,14 @@ const bcrypt = require('bcryptjs');
 app.post('/track', async (req, res) => {
   try {
     const trackingId = uuidv4();
-    const { status, currentLocation, estimatedDelivery } = req.body;
+    const { status, currentLocation, estimatedDelivery, productName } = req.body;
 
     const newPackage = new Package({
       trackingId,
       status: status || 'Pending',
       currentLocation: currentLocation || 'Origin',
       estimatedDelivery: estimatedDelivery || null,
+      productName:productName ||null,
       history: [
         {
           location: currentLocation || 'Origin',
@@ -157,7 +159,7 @@ app.get('/track/:trackingId', async (req, res) => {
 app.put('/track/:trackingId/update', async (req, res) => {
   try {
     const { trackingId } = req.params;
-    const { status, currentLocation } = req.body;
+    const { status, currentLocation, productName } = req.body;
 
     const trackingData = await Package.findOne({ trackingId });
 
@@ -168,6 +170,7 @@ app.put('/track/:trackingId/update', async (req, res) => {
     if (status) trackingData.status = status;
     if (currentLocation) {
       trackingData.currentLocation = currentLocation;
+      trackingData.productName=productName;
       trackingData.history.push({
         location: currentLocation,
         time: new Date().toISOString(),
