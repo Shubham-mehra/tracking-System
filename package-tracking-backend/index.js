@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT;
-
+console.log(process.env.MONGODB_URI)
 // Connect to MongoDB (replace with your actual MongoDB URI)
 mongoose.connect(process.env.MONGODB_URI, 
 //   {
@@ -25,11 +25,13 @@ const packageSchema = new mongoose.Schema({
   status: { type: String, default: 'Pending' },
   currentLocation: { type: String, default: 'Origin' },
   productName : {type: String, default:'Null'},
+  orderDate: String,
   estimatedDelivery: String,
   history: [
     {
       location: String,
       time: String,
+      status: String
     },
   ],
 });
@@ -72,11 +74,24 @@ const authMiddleware = (req, res, next) => {
 
 const bcrypt = require('bcryptjs');
 
+app.get("/api/health", async (req, res) => {
+  const mongoState = mongoose.connection.readyState;
+  // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+  const states = ["Disconnected", "Connected", "Connecting", "Disconnecting"];
+
+  res.json({
+    status: "ok",
+    mongo: states[mongoState] || "Unknown",
+    time: new Date().toISOString(),
+  });
+});
+
+
 // Endpoint to create a new tracking entry
 app.post('/track', async (req, res) => {
   try {
     const trackingId = uuidv4();
-    const { status, currentLocation, estimatedDelivery, productName } = req.body;
+    const { status, currentLocation, estimatedDelivery, productName, orderDate } = req.body;
 
     const newPackage = new Package({
       trackingId,
@@ -84,9 +99,11 @@ app.post('/track', async (req, res) => {
       currentLocation: currentLocation || 'Origin',
       estimatedDelivery: estimatedDelivery || null,
       productName:productName ||null,
+      orderDate: orderDate || null,
       history: [
         {
           location: currentLocation || 'Origin',
+          status: status,
           time: new Date().toISOString(),
         },
       ],
@@ -126,7 +143,7 @@ app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   const user = await Admin.findOne({ email });
   if (!user) return res.status(404).json({ message: 'User not found' });
-
+  console.log(" user.password", user.password)
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
@@ -159,8 +176,8 @@ app.get('/track/:trackingId', async (req, res) => {
 app.put('/track/:trackingId/update', async (req, res) => {
   try {
     const { trackingId } = req.params;
-    const { status, currentLocation, productName } = req.body;
-
+    const { status, currentLocation, productName , estimatedDelivery, orderDate} = req.body;
+console.log("orderDate",orderDate)
     const trackingData = await Package.findOne({ trackingId });
 
     if (!trackingData) {
@@ -171,8 +188,11 @@ app.put('/track/:trackingId/update', async (req, res) => {
     if (currentLocation) {
       trackingData.currentLocation = currentLocation;
       trackingData.productName=productName;
+      trackingData.orderDate=orderDate
+      trackingData.estimatedDelivery=estimatedDelivery;
       trackingData.history.push({
         location: currentLocation,
+        status: status,
         time: new Date().toISOString(),
       });
     }
@@ -183,6 +203,24 @@ app.put('/track/:trackingId/update', async (req, res) => {
     res.status(500).json({ message: 'Error updating package', error });
   }
 });
+
+// Endpoint to delete a product (package) by tracking ID
+app.delete('/track/:trackingId/', authMiddleware, async (req, res) => {
+  try {
+    const { trackingId } = req.params;
+
+    const deletedPackage = await Package.findOneAndDelete({ trackingId });
+
+    if (!deletedPackage) {
+      return res.status(404).json({ message: 'Tracking ID not found' });
+    }
+
+    res.json({ message: 'Package deleted successfully', deletedPackage });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting package', error });
+  }
+});
+
 
 // Start the server
 app.listen(port, () => {

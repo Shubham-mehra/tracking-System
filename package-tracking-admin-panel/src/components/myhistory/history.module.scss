@@ -1,0 +1,78 @@
+/* components/HistoryTimeline.module.scss */
+.timelineWrapper {
+    text-align: center;
+    padding: 2rem;
+    background-color: #f5f5f5;
+  
+    h2 {
+      font-weight: 700;
+    }
+  
+    p {
+      margin-bottom: 2rem;
+    }
+  }
+  
+  .timeline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .arrowBtn {
+    background: #154c63;
+    color: white;
+    font-size: 1.5rem;
+    padding: 0.6rem 1rem;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  
+    &:hover {
+      background: #1c6c88;
+    }
+  }
+  
+  .steps {
+    display: flex;
+    align-items: center;
+  }
+  
+  .step {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  
+    .circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid #154c63;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: white;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+  
+    .line {
+      width: 50px;
+      height: 2px;
+      background-color: #154c63;
+    }
+  
+    &.active .circle {
+      background-color: #154c63;
+      color: white;
+      font-weight: bold;
+    }
+  }
+  
+  .description {
+    margin-top: 2rem;
+    font-size: 1.1rem;
+    color: #333;
+  }
+  

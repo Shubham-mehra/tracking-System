@@ -1,0 +1,29 @@
+{
+    "TRK123456": {
+      "productName": "EcoSmart Wireless Headphones",
+      "estimatedDelivery": "2025-04-15",
+      "history": [
+        {
+          "status": "Ordered",
+          "location": "Toronto, ON",
+          "time": "2025-04-01T10:00:00"
+        },
+        {
+          "status": "Packed",
+          "location": "Toronto Warehouse",
+          "time": "2025-04-02T12:30:00"
+        },
+        {
+          "status": "Shipped",
+          "location": "Mississauga, ON",
+          "time": "2025-04-03T15:00:00"
+        },
+        {
+          "status": "Out for Delivery",
+          "location": "Scarborough, ON",
+          "time": "2025-04-05T08:00:00"
+        }
+      ]
+    }
+  }
+  

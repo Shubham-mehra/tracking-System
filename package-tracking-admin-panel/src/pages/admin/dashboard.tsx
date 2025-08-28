@@ -1,16 +1,18 @@
-import Sidebar from '@/components/sidebar/SidebarSection';
-import ProductsTable from '@/components/table/ProductTable';
+import Sidebar from "@/components/sidebar/SidebarSection";
+import ProductsTable from "@/components/table/ProductTable";
 
-import { useAdminAuth } from '@/hooks/useAdminAuth';
-import { fetchProducts } from '@/utils/products';
-import { useEffect, useState } from 'react';
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { fetchProducts } from "@/utils/products";
+import { useEffect, useState } from "react";
 
-interface Product {
+export interface Product {
   _id: string;
   trackingId: string;
+  productName: string;
   status: string;
   currentLocation: string;
   estimatedDelivery: string;
+  orderDate: any,
   history: {
     location: string;
     time: string;
@@ -20,7 +22,7 @@ interface Product {
 
 export default function DashboardPage() {
   const { isLoading, isAuthorized, handleLogout } = useAdminAuth();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<any>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export default function DashboardPage() {
         const data = await fetchProducts();
         setProducts(data);
       } catch (err) {
-        console.error('Error loading products:', err);
+        console.error("Error loading products:", err);
       } finally {
         setLoadingProducts(false);
       }
@@ -39,14 +41,14 @@ export default function DashboardPage() {
   }, [isAuthorized]);
 
   const headers = [
-    { key: 'index', label: '#' },
-    { key: 'trackingId', label: 'Tracking ID' },
-    { key: 'productName', label: 'Product Name' },
-    { key: 'status', label: 'Status' },
-    { key: 'currentLocation', label: 'Current Location' },
-    { key: 'estimatedDelivery', label: 'Estimated Delivery' },
-    { key: 'lastUpdated', label: 'Last Updated' },
-    
+    { key: "index", label: "#" },
+    { key: "trackingId", label: "Tracking ID" },
+    { key: "productName", label: "Product Name" },
+    { key: "status", label: "Status" },
+    { key: "currentLocation", label: "Current Location" },
+    { key: "estimatedDelivery", label: "Estimated Delivery" },
+    { key: "orderDate", label: "Order Date" },
+    { key: "lastUpdated", label: "Last Updated" },
   ];
 
   if (isLoading || loadingProducts) return <p>Loading...</p>;
@@ -71,7 +73,11 @@ export default function DashboardPage() {
 
           <ProductsTable
             headers={headers}
-            data={products.map((p, i) => ({ ...p, index: i + 1 }))}
+            data={products}
+            setProducts={setProducts}
+            onProductAdded={(newProd) =>
+              setProducts((prev: any) => [...prev, newProd])
+            }
           />
         </div>
       </main>
